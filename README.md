@@ -14,5 +14,5 @@
 
 ## Folders
 
-1. Backend: Has both producer and consumer (app) service containerized. We are using 3 host in kafka service with zookeeper to mimic multi host behavior.
+1. Backend: Contains services: producer, kafka, zookeeper, consumer.
 2. Frontend: App made in flutter. Uses syncfusion charts to generate charts.

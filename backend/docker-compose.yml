@@ -1,23 +1,23 @@
 version: '3.7'
 services:
   zookeeper:
+    env_file:
+    - ./.env
     hostname: zookeeper
-    image: wurstmeister/zookeeper:3.4.6
+    image: bitnami/zookeeper
     expose:
     - "2181"
     ports:
     - "2181:2181"
   
   kafka:
-    image: wurstmeister/kafka
+    image: bitnami/kafka
     env_file:
     - ./.env
     depends_on:
     - zookeeper
     ports:
     - '9092:9092'
-    - '8082:8082'
-    - '8083:8083'
 
   app:
     build:
@@ -41,7 +41,6 @@ services:
     restart: always
     depends_on:
       - kafka
-
 
 volumes:
   kafka_data:

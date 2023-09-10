@@ -1,0 +1,48 @@
+version: '3.7'
+services:
+  zookeeper:
+    hostname: zookeeper
+    image: wurstmeister/zookeeper:3.4.6
+    expose:
+    - "2181"
+    ports:
+    - "2181:2181"
+  
+  kafka:
+    image: wurstmeister/kafka
+    env_file:
+    - ./.env
+    depends_on:
+    - zookeeper
+    ports:
+    - '9092:9092'
+    - '8082:8082'
+    - '8083:8083'
+
+  app:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+    depends_on:
+      - kafka
+
+  producer:
+    build:
+      context: .
+      dockerfile: ./producer/Dockerfile
+    env_file:
+      - ./.env
+    ports:
+      - 8001:8000
+    restart: always
+    depends_on:
+      - kafka
+
+
+volumes:
+  kafka_data:
+    driver: local

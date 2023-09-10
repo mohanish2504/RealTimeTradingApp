@@ -4,9 +4,7 @@
 <img src="https://raw.githubusercontent.com/mohanish2504/RealTimeTradingApp/main/screenshots/hld.png">
 </p>
 
-## Description
-
-Application consist of 4 main componenets:
+## Components
 
 1. Source: We are using Binance websocket to fetch realtime data.
 2. Producer Service: The above data source is subscribed by producer service. Once connected it starts adding to kafka stream.

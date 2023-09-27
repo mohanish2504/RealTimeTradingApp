@@ -16,3 +16,8 @@
 
 1. Backend: Contains services: producer, kafka, zookeeper, consumer.
 2. Frontend: App made in flutter. Uses syncfusion charts to generate charts.
+
+
+## Screenshots (Frontend)
+<img src="https://raw.githubusercontent.com/mohanish2504/RealTimeTradingApp/main/screenshots/screenshot_1.png">
+<img src="https://raw.githubusercontent.com/mohanish2504/RealTimeTradingApp/main/screenshots/screenshot_2.png">

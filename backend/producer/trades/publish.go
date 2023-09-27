@@ -3,7 +3,6 @@ package trades
 import (
 	"context"
 	"log"
-
 	"github.com/segmentio/kafka-go"
 )
 
@@ -25,19 +24,19 @@ func Publish(t string, message kafka.Message, topic string) error {
 	}
 	
 	w := kafka.Writer{
-		Addr: kafka.TCP(HOST + ":" + PORT),
+		Addr: kafka.TCP(HOST + ":" + PORT), //127.0.0.1:9092 or kafka:9092 in docker
 		Topic: topic,
 		AllowAutoTopicCreation: true,
 	}
-
-	err := w.WriteMessages(context.Background(), messages...)
-	
 	defer w.Close()
 
+	err := w.WriteMessages(context.Background(), messages...)
 	if err != nil {
 		log.Println("Error writing messages to Kafka: ", err.Error())
 		return err
 	}
+
+	log.Println("Publish messages to Kafka on topic: ", topic)
 	
 	return nil
 }

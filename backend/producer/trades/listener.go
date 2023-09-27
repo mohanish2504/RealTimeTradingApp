@@ -2,15 +2,19 @@ package trades
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/url"
 	"strconv"
 	"strings"
 	"github.com/gorilla/websocket"
 	"github.com/segmentio/kafka-go"
-	
 )
+
+type RequestParams struct {
+	Id     int      `json:"id"`
+	Method string   `json:"method"`
+	Params []string `json:"params"`
+}
 
 var conn *websocket.Conn
 
@@ -40,25 +44,20 @@ func CloseConnections() {
 	conn.Close()
 }
 
-func EstablishConnection() error {
-	if (conn!=nil){
-		return nil
-	}
+func EstablishConnection() (*websocket.Conn, error) {
 	newConnection, err := getConnection()
 	if err != nil {
 		log.Fatal("Failed to get connection %s", err.Error())
-		return err
+		return nil, err
 	}
-	conn = newConnection
-	return nil
+	return newConnection, nil
 }
 
 func AddOnConnectionClose(h func(code int, text string) error) {
-
 	conn.SetCloseHandler(h)
 }
 
-func unsubscirbeOnClose(tradeTopics []string) error {
+func unsubscirbeOnClose(conn *websocket.Conn, tradeTopics []string) error {
 	message := struct {
 		Id     int      `json:"id"`
 		Method string   `json:"method"`
@@ -81,18 +80,18 @@ func unsubscirbeOnClose(tradeTopics []string) error {
 }
 
 func SubScribeAndListen(topics []string) error {
-	err := EstablishConnection()
+	conn, err := getConnection()
 	if err != nil {
 		log.Fatal("Failed to get connection %s", err.Error())
 		return err
 	}
 
 	conn.SetPongHandler(func(appData string) error {
-		fmt.Println("Received pong:", appData)
+		log.Println("Received pong:", appData)
 		pingFrame := []byte{1, 2, 3, 4, 5}
 		err := conn.WriteMessage(websocket.PingMessage, pingFrame)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			// no need to fail
 		}
 		return nil
@@ -103,11 +102,7 @@ func SubScribeAndListen(topics []string) error {
 		tradeTopics = append(tradeTopics, topic+"@"+"aggTrade")
 	}
 	log.Println("Listening to trades for ", tradeTopics)
-	message := struct {
-		Id     int      `json:"id"`
-		Method string   `json:"method"`
-		Params []string `json:"params"`
-	}{
+	message := RequestParams{
 		Id:     subscribeId,
 		Method: "SUBSCRIBE",
 		Params: tradeTopics,
@@ -125,13 +120,13 @@ func SubScribeAndListen(topics []string) error {
 		return err
 	}
 
+	defer unsubscirbeOnClose(conn, tradeTopics)
 	defer conn.Close()
-	defer unsubscirbeOnClose(tradeTopics)
-
+	
 	for {
 		_, payload, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return err
 		}
 
@@ -139,7 +134,7 @@ func SubScribeAndListen(topics []string) error {
 
 		err = json.Unmarshal(payload, &trade)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			return err
 		}
 
@@ -147,7 +142,6 @@ func SubScribeAndListen(topics []string) error {
 		go func() {
 			convertAndPublishToKafka(trade)
 		}()
-
 	}
 }
 
@@ -160,7 +154,5 @@ func convertAndPublishToKafka(t Ticker) {
 	Publish(t.String(), kafka.Message{
 		Key:   []byte(t.Symbol + "-" + strconv.Itoa(int(t.Time))),
 		Value: bytes,
-		
-	},"trades-"+strings.ToLower(t.Symbol))
-	
+	}, "trades-"+strings.ToLower(t.Symbol))
 }

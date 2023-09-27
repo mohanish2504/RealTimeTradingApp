@@ -1,17 +1,14 @@
 FROM golang:1.19-alpine AS builder
 
 
-RUN mkdir producer
+
 # Copy the code into the container.
+RUN mkdir app
 
-
-COPY ./producer /producer
-COPY .env /producer/.env
-
-WORKDIR /producer
+COPY producer /app
+WORKDIR /app
 
 RUN go mod download
-RUN ls
 RUN go build .
 
 ENTRYPOINT [ "./producer" ]

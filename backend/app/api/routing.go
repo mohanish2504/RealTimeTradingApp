@@ -23,4 +23,3 @@ func AddRoutes(app *fiber.App) {
 	
 }
 
-func main() {}

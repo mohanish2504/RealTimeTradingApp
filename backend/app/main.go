@@ -3,7 +3,6 @@ package main
 import (
 	"app/api"
 	"app/core"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )

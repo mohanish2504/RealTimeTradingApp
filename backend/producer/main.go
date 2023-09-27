@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+	trades "producer/trades"
 	"strings"
 
 	"github.com/joho/godotenv"
-	trades "producer/trades"
 )
 
 
@@ -14,24 +15,19 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Print("Failed to load environment")
+		log.Fatal("Failed to load env file")
 	}
 
 	t := os.Getenv("TICKERS")
 	topics := strings.Split(t, ",")
-
+	fmt.Println(topics)
 	for i,topic := range topics {
 		topics[i] = strings.Trim(strings.Trim(topic,"\\"),"\"")
 	}
 
 	trades.LoadHostAndPort(os.Getenv("KAFKA_HOST"),os.Getenv("KAFKA_PORT"))
 
-	trades.EstablishConnection()
-	trades.AddOnConnectionClose(
-		func(code int, text string) error {
-			return nil
-		},
-	)
+	
 	defer trades.CloseConnections()
 	
 	trades.SubScribeAndListen(

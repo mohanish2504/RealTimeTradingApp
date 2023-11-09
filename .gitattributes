@@ -2,3 +2,4 @@
 *.c++  linguist-detectable=false
 *.c  linguist-detectable=false
 *.dart  linguist-detectable=false
+frontend/* linguist-vendored

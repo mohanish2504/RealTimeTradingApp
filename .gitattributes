@@ -1,5 +1,5 @@
 *.html linguist-detectable=false
-*.hpp  linguist-language=go
-*.hpp  linguist-language=go
+*.h  linguist-language=go
+*.cpp  linguist-language=go
 *.dart  linguist-detectable=false
 frontend/* linguist-vendored
